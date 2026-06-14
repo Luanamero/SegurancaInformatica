@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Início — App Segura{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>App Segura — versão corrigida</h1>
+  <p>Use os mesmos payloads da app vulnerável. Os ataques não funcionam aqui.</p>
+</div>
+
+<!-- Comparison table -->
+<div class="card">
+  <div class="card-head">
+    <h2 style="margin:0">O que mudou</h2>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Aspecto</th><th style="color:var(--red)">Vulnerável</th><th style="color:var(--green)">Segura</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Construção da query</td>
+          <td style="color:var(--red)">Concatenação de strings</td>
+          <td style="color:var(--green)">Prepared statement (<code>?</code>)</td>
+        </tr>
+        <tr>
+          <td>Erros SQL</td>
+          <td style="color:var(--red)">Expostos ao utilizador</td>
+          <td style="color:var(--green)">Mensagem genérica</td>
+        </tr>
+        <tr>
+          <td>Validação de input</td>
+          <td style="color:var(--red)">Nenhuma</td>
+          <td style="color:var(--green)">Comprimento + campos obrigatórios</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <a href="/login" style="text-decoration:none">
+    <div class="card" style="margin:0;cursor:pointer">
+      <div class="card-body" style="text-align:center;padding:28px 20px">
+        <div style="font-size:28px;margin-bottom:10px">🔐</div>
+        <div style="font-weight:600;margin-bottom:4px">Login seguro</div>
+        <div style="font-size:12px;color:var(--gray-600)">Tente o mesmo bypass</div>
+      </div>
+    </div>
+  </a>
+  <a href="/search" style="text-decoration:none">
+    <div class="card" style="margin:0;cursor:pointer">
+      <div class="card-body" style="text-align:center;padding:28px 20px">
+        <div style="font-size:28px;margin-bottom:10px">🔍</div>
+        <div style="font-weight:600;margin-bottom:4px">Pesquisa segura</div>
+        <div style="font-size:12px;color:var(--gray-600)">Tente o mesmo UNION attack</div>
+      </div>
+    </div>
+  </a>
+</div>
+
+{% endblock %}

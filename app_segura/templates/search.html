@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Pesquisa — Segura{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Pesquisa de utilizadores</h1>
+  <p>Versão segura — tente os mesmos payloads UNION.</p>
+</div>
+
+<div class="split">
+  <!-- LEFT: form -->
+  <div class="panel">
+    <div class="panel-head"><span style="color:var(--green)">✓</span> Campo de pesquisa</div>
+    <div class="panel-body">
+      <form method="POST">
+        <div class="field">
+          <label>termo</label>
+          <input type="text" name="term" value="{{ request.form.get('term','') }}"
+                 placeholder="' UNION SELECT id,name,value FROM secrets --"
+                 autocomplete="off" spellcheck="false" style="font-size:12px">
+        </div>
+        <button type="submit" class="btn btn-green">Pesquisar</button>
+      </form>
+
+      {% if error %}
+        <div class="result result-fail">{{ error }}</div>
+      {% endif %}
+
+      {% if results is not none %}
+        {% if results|length == 0 %}
+          <div class="result result-fail" style="margin-top:14px">
+            Nenhum resultado — o payload foi tratado como texto literal.
+          </div>
+        {% else %}
+          <div style="margin-top:16px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:8px">
+              ✓ {{ results|length }} utilizador(es) — só dados da tabela users
+            </div>
+            <table>
+              <thead><tr><th>ID</th><th>Username</th><th>Email</th></tr></thead>
+              <tbody>
+                {% for row in results %}
+                <tr>
+                  <td>{{ row[0] }}</td>
+                  <td>{{ row[1] }}</td>
+                  <td>{{ row[2] }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: query -->
+  <div class="panel">
+    <div class="panel-head"><span>⚙</span> Query enviada ao driver</div>
+    <div class="panel-body">
+      {% if query_used %}
+        <div class="codeblock" style="color:#69db7c">{{ query_used }}</div>
+        {% if results is not none and results|length == 0 and request.form.get('term') %}
+          <div class="callout callout-green" style="margin-top:12px">
+            <strong>UNION bloqueado.</strong>
+            O driver procurou literalmente um utilizador cujo username contém
+            <code>{{ request.form.get('term','')[:40] }}</code>. Não existe — resultado vazio.
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="codeblock" style="color:#69db7c;opacity:.7">SELECT id, username, email
+FROM users
+WHERE username LIKE <span style="color:#ffd43b">?</span>
+
+<span style="color:#6c757d">-- parâmetro: "%" + input + "%"
+-- construído pelo Python, nunca pelo SQL</span></div>
+        <div class="callout callout-green" style="margin-top:12px">
+          O <code>UNION SELECT</code> dentro do parâmetro é procurado como texto na coluna username.
+          Nenhum utilizador tem esse nome → sem dados extraídos.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

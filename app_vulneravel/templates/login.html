@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Login — Vulnerável{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Login</h1>
+  <p>Versão vulnerável — concatenação directa de strings na query.</p>
+</div>
+
+<div class="split">
+  <!-- LEFT: form -->
+  <div class="panel">
+    <div class="panel-head">
+      <span style="color:var(--red)">⚠</span> Formulário
+    </div>
+    <div class="panel-body">
+      <form method="POST">
+        <div class="field">
+          <label>username</label>
+          <input type="text" name="username" value="{{ request.form.get('username','') }}"
+                 placeholder="' OR '1'='1' --" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>password</label>
+          <input type="password" name="password" placeholder="qualquer coisa">
+        </div>
+        <button type="submit" class="btn btn-red">Fazer login</button>
+      </form>
+
+      {% if result %}
+        <div class="result {{ 'result-ok' if result.success else ('result-warn' if '⚠' in result.message else 'result-fail') }}">
+          {{ result.message }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: query + explanation -->
+  <div class="panel">
+    <div class="panel-head">
+      <span>⚙</span> Query executada
+    </div>
+    <div class="panel-body">
+      {% if query_used %}
+        <div class="codeblock">{{ query_used }}</div>
+        {% if result and result.success %}
+          <div class="callout callout-red" style="margin-top:12px">
+            <strong>Ataque bem-sucedido.</strong> O <code>--</code> comentou o resto da query.
+            A condição <code>'1'='1'</code> é sempre verdadeira — o WHERE nunca filtra nada.
+          </div>
+        {% endif %}
+      {% else %}
+        <div style="color:var(--gray-400);font-family:var(--mono);font-size:13px;margin-top:4px">
+          A query aparece aqui depois do submit.
+        </div>
+        <div class="codeblock" style="opacity:.5">SELECT * FROM users
+WHERE username = '<span class="hl">{input}</span>'
+  AND password = '<span class="hl">{input}</span>'</div>
+        <div class="callout callout-red" style="margin-top:12px">
+          O input do utilizador é colado directamente na query sem nenhum escape ou validação.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

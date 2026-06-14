@@ -1,0 +1,7 @@
+venv/
+database/app.db
+*.log
+__pycache__/
+*.pyc
+.DS_Store
+*.log

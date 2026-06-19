@@ -29,16 +29,14 @@ As duas apps partilham a mesma base de dados e têm as mesmas páginas (`/`, `/l
 **Pré-requisitos:** Python 3.8+ e pip.
 
 ```bash
-# 1. Entrar na pasta do projeto
-cd projeto-sqli
 
-# 2. Instalar as dependências (Flask + requests)
+# 1. Instalar as dependências (Flask + requests)
 pip install -r requirements.txt
 
-# 3. Criar a base de dados
+# 2. Criar a base de dados
 python3 database/init_db.py
 
-# 4. Arrancar as duas apps
+# 3. Arrancar as duas apps
 bash start.sh
 ```
 

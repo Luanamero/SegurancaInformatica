@@ -30,13 +30,27 @@ As duas apps partilham a mesma base de dados e têm as mesmas páginas (`/`, `/l
 
 ```bash
 
-# 1. Instalar as dependências (Flask + requests)
+# 1. Criar o ambiente virtual
+python3 -m venv venv
+
+# 2. Ativar o ambiente virtual
+
+# Linux / macOS
+source venv/bin/activate
+
+# Windows (Prompt de Comando)
+venv\Scripts\activate
+
+# Windows (PowerShell)
+venv\Scripts\Activate.ps1
+
+# 3. Instalar as dependências (Flask + requests)
 pip install -r requirements.txt
 
-# 2. Criar a base de dados
+# 4. Criar a base de dados
 python3 database/init_db.py
 
-# 3. Arrancar as duas apps
+# 5. Arrancar as duas apps
 bash start.sh
 ```
 

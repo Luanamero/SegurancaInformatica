@@ -11,11 +11,11 @@ echo "  ╚═══════════════════════
 echo ""
 
 if ! command -v python3 &> /dev/null; then
-    echo "  ❌ Python3 não encontrado. Instale Python 3.8+"
+    echo "   Python3 não encontrado. Instale Python 3.8+"
     exit 1
 fi
 if ! python3 -c "import flask" 2>/dev/null; then
-    echo "  ⚠️  A instalar dependências..."
+    echo "    A instalar dependências..."
     pip install -r "$ROOT_DIR/requirements.txt"
 fi
 
@@ -34,10 +34,10 @@ PID_SAFE=$!
 sleep 1
 
 echo ""
-echo "  ✅ Ambas as apps estão a correr!"
+echo "   Ambas as apps estão a correr!"
 echo ""
-echo "  ⚠️  App Vulnerável : http://localhost:5001"
-echo "  ✅  App Segura     : http://localhost:5002"
+echo "    App Vulnerável : http://localhost:5001"
+echo "    App Segura     : http://localhost:5002"
 echo ""
 echo "  Pressiona Ctrl+C para parar ambos os servidores."
 echo ""

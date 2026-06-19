@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}SQLi Lab{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --white:   #ffffff;
+  --gray-50: #f8f9fa;
+  --gray-100:#f1f3f5;
+  --gray-200:#e9ecef;
+  --gray-400:#adb5bd;
+  --gray-600:#6c757d;
+  --gray-800:#343a40;
+  --gray-900:#212529;
+  --red:     #e03131;
+  --red-bg:  #fff5f5;
+  --red-border:#ffc9c9;
+  --green:   #2f9e44;
+  --green-bg:#ebfbee;
+  --green-border:#b2f2bb;
+  --orange:  #e8590c;
+  --orange-bg:#fff4e6;
+  --blue:    #1971c2;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+}
+
+body{
+  font-family:var(--sans);
+  background:var(--gray-50);
+  color:var(--gray-900);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  font-size:14px;
+  line-height:1.5;
+}
+
+/* ── NAV ── */
+nav{
+  background:var(--white);
+  border-bottom:1px solid var(--gray-200);
+  padding:0 32px;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+.nav-brand{
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--gray-600);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.mode-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:3px 9px;
+  border-radius:4px;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.mode-vuln{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.mode-safe{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+
+.nav-links{display:flex;gap:2px}
+.nav-links a{
+  font-size:13px;
+  color:var(--gray-600);
+  text-decoration:none;
+  padding:5px 12px;
+  border-radius:6px;
+  transition:background .1s,color .1s;
+}
+.nav-links a:hover{background:var(--gray-100);color:var(--gray-900)}
+.nav-links a.active{background:var(--gray-100);color:var(--gray-900);font-weight:500}
+
+/* ── MAIN ── */
+main{flex:1;max-width:920px;margin:0 auto;padding:36px 24px;width:100%}
+
+/* ── TYPOGRAPHY ── */
+h1{font-size:22px;font-weight:700;letter-spacing:-.3px;color:var(--gray-900)}
+h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-600);margin-bottom:14px}
+
+/* ── PANEL (split layout) ── */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+@media(max-width:680px){.split{grid-template-columns:1fr}}
+
+.panel{
+  background:var(--white);
+  border:1px solid var(--gray-200);
+  border-radius:10px;
+  overflow:hidden;
+}
+.panel-head{
+  padding:12px 18px;
+  border-bottom:1px solid var(--gray-200);
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--gray-600);
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:var(--gray-50);
+}
+.panel-body{padding:20px 18px}
+
+/* ── FORM ELEMENTS ── */
+.field{margin-bottom:14px}
+.field label{
+  display:block;
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:600;
+  color:var(--gray-600);
+  margin-bottom:5px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+input[type=text],input[type=password]{
+  width:100%;
+  border:1px solid var(--gray-200);
+  border-radius:6px;
+  padding:9px 12px;
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--gray-900);
+  background:var(--white);
+  outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(25,113,194,.1)}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:9px 18px;
+  border:none;
+  border-radius:6px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:opacity .15s;
+}
+.btn:hover{opacity:.85}
+.btn-red{background:var(--red);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-gray{background:var(--gray-800);color:#fff}
+
+/* ── CODE BLOCK ── */
+.codeblock{
+  background:var(--gray-900);
+  color:#a9dc76;
+  font-family:var(--mono);
+  font-size:12px;
+  line-height:1.7;
+  padding:14px 16px;
+  border-radius:7px;
+  white-space:pre-wrap;
+  word-break:break-all;
+  margin-top:14px;
+}
+.codeblock .hl{color:#ff6b6b}
+.codeblock .ok{color:#69db7c}
+.codeblock .dim{color:#6c757d}
+
+/* ── RESULT ── */
+.result{
+  margin-top:14px;
+  padding:12px 16px;
+  border-radius:7px;
+  font-family:var(--mono);
+  font-size:13px;
+  font-weight:500;
+}
+.result-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.result-fail{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.result-warn{background:var(--orange-bg);color:var(--orange);border:1px solid #ffd8a8}
+
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  background:var(--gray-50);
+  color:var(--gray-600);
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  padding:9px 14px;
+  text-align:left;
+  border-bottom:1px solid var(--gray-200);
+}
+td{padding:10px 14px;border-bottom:1px solid var(--gray-100);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--gray-50)}
+code{
+  font-family:var(--mono);
+  font-size:12px;
+  background:var(--gray-100);
+  padding:2px 6px;
+  border-radius:4px;
+  color:var(--gray-800);
+}
+
+/* ── CALLOUT ── */
+.callout{
+  border-left:3px solid;
+  padding:12px 16px;
+  border-radius:0 7px 7px 0;
+  font-size:13px;
+  line-height:1.6;
+  margin-top:14px;
+}
+.callout-red{border-color:var(--red);background:var(--red-bg);color:#c92a2a}
+.callout-green{border-color:var(--green);background:var(--green-bg);color:#2b8a3e}
+.callout-blue{border-color:var(--blue);background:#e7f5ff;color:#1864ab}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:28px}
+.page-header h1{margin-bottom:6px}
+.page-header p{color:var(--gray-600);font-size:14px}
+
+/* ── FULL CARD ── */
+.card{
+  background:var(--white);
+  border:1px solid var(--gray-200);
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:16px;
+}
+.card-head{
+  padding:14px 20px;
+  border-bottom:1px solid var(--gray-200);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.card-body{padding:20px}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;
+  padding:16px;
+  font-size:12px;
+  color:var(--gray-400);
+  border-top:1px solid var(--gray-200);
+  font-family:var(--mono);
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">
+    <span style="color:var(--gray-400)">●</span>
+    sqli-lab
+    <span style="color:var(--gray-300)">/</span>
+    {% if app_type == 'vulnerable' %}
+      <span class="mode-pill mode-vuln">⚠ vulnerável</span>
+    {% else %}
+      <span class="mode-pill mode-safe">✓ segura</span>
+    {% endif %}
+  </div>
+  <div class="nav-links">
+    <a href="/" {% if request.endpoint=='index' %}class="active"{% endif %}>início</a>
+    <a href="/login" {% if request.endpoint=='login' %}class="active"{% endif %}>login</a>
+    <a href="/search" {% if request.endpoint=='search' %}class="active"{% endif %}>pesquisa</a>
+  </div>
+</nav>
+<main>{% block content %}{% endblock %}</main>
+<footer>Segurança Informática 2025/2026 · fins educativos · ambiente local</footer>
+</body>
+</html>

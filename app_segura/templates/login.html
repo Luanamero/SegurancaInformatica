@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Login — Segura{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Login</h1>
+  <p>Versão segura — prepared statements. Tente os mesmos payloads.</p>
+</div>
+
+<div class="split">
+  <!-- LEFT: form -->
+  <div class="panel">
+    <div class="panel-head"><span style="color:var(--green)">✓</span> Formulário</div>
+    <div class="panel-body">
+      <form method="POST">
+        <div class="field">
+          <label>username</label>
+          <input type="text" name="username" value="{{ request.form.get('username','') }}"
+                 placeholder="admin" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>password</label>
+          <input type="password" name="password" placeholder="admin123">
+        </div>
+        <button type="submit" class="btn btn-green">Fazer login</button>
+      </form>
+      <div style="margin-top:12px;font-size:12px;color:var(--gray-400);font-family:var(--mono)">
+        credenciais válidas: admin/admin123 · alice/alice456
+      </div>
+
+      {% if result %}
+        <div class="result {{ 'result-ok' if result.success else 'result-fail' }}">
+          {{ result.message }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: query -->
+  <div class="panel">
+    <div class="panel-head"><span>⚙</span> Query enviada ao driver</div>
+    <div class="panel-body">
+      {% if query_used %}
+        <div class="codeblock" style="color:#69db7c">{{ query_used }}</div>
+        {% if result and not result.success and request.form.get('username') %}
+          <div class="callout callout-green" style="margin-top:12px">
+            <strong>Ataque bloqueado.</strong>
+            O <code>?</code> foi substituído pelo texto literal que o utilizador escreveu.
+            O driver nunca interpreta esse texto como SQL.
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="codeblock" style="color:#69db7c;opacity:.7">SELECT * FROM users
+WHERE username = <span style="color:#ffd43b">?</span>
+  AND password = <span style="color:#ffd43b">?</span>
+
+<span style="color:#6c757d">-- parâmetros passados separadamente,
+-- nunca concatenados na query</span></div>
+        <div class="callout callout-green" style="margin-top:12px">
+          O <code>?</code> é um placeholder. O driver SQLite substitui-o pelo valor exacto,
+          sem nunca o interpretar como SQL — qualquer payload é tratado como texto literal.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

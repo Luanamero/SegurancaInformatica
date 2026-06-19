@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Pesquisa — Vulnerável{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Pesquisa de utilizadores</h1>
+  <p>Versão vulnerável — UNION injection possível.</p>
+</div>
+
+<div class="split">
+  <!-- LEFT: form -->
+  <div class="panel">
+    <div class="panel-head"><span style="color:var(--red)">⚠</span> Campo de pesquisa</div>
+    <div class="panel-body">
+      <form method="POST">
+        <div class="field">
+          <label>termo</label>
+          <input type="text" name="term" value="{{ request.form.get('term','') }}"
+                 placeholder="' UNION SELECT id,name,value FROM secrets --"
+                 autocomplete="off" spellcheck="false" style="font-size:12px">
+        </div>
+        <button type="submit" class="btn btn-red">Pesquisar</button>
+      </form>
+
+      {% if error %}
+        <div class="result result-warn">⚠ {{ error }}</div>
+      {% endif %}
+
+      {% if results is not none %}
+        {% if results|length == 0 %}
+          <div class="result result-fail">Sem resultados.</div>
+        {% else %}
+          <div style="margin-top:16px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-600);margin-bottom:8px">
+              {{ results|length }} linha(s) — podem ser de outra tabela
+            </div>
+            <table>
+              <thead><tr><th>col 1</th><th>col 2</th><th>col 3</th></tr></thead>
+              <tbody>
+                {% for row in results %}
+                <tr>
+                  <td>{{ row[0] }}</td>
+                  <td>{{ row[1] }}</td>
+                  <td style="font-family:var(--mono);font-size:12px;color:var(--red)">{{ row[2] }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: query -->
+  <div class="panel">
+    <div class="panel-head"><span>⚙</span> Query executada</div>
+    <div class="panel-body">
+      {% if query_used %}
+        <div class="codeblock">{{ query_used }}</div>
+        {% if results and results|length > 0 %}
+          <div class="callout callout-red" style="margin-top:12px">
+            <strong>UNION injection bem-sucedida.</strong>
+            Os resultados acima não são só utilizadores — incluem dados de outra tabela injectada pelo atacante.
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="codeblock" style="opacity:.5">SELECT id, username, email
+FROM users
+WHERE username LIKE '%<span class="hl">{input}</span>%'</div>
+        <div class="callout callout-red" style="margin-top:12px">
+          Com <code>UNION SELECT</code>, o atacante acopla uma segunda query e extrai dados de qualquer tabela da base de dados.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
